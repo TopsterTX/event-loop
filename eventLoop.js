@@ -1,29 +1,29 @@
 const fs = require('fs')
 
-console.log('start')                                                            // Синхронная операци
+console.log('start')                                                              // Синхронная операци
 
-setTimeout(() => {                                                    // Регистрируем колбэк в фазу "timers"
+setTimeout(() => {                                                      // Регистрируем колбэк в фазу "timers"
     console.log('setTimeout 1')
 }, 0)
 
-setImmediate(() => console.log('setImmediate'))                                 // Регистрируем колбэк в фазу "check"
+setImmediate(() => console.log('setImmediate'))                        // Регистрируем колбэк в фазу "check"
 
-fs.readFile(__filename, () => {                                                 // Регистрируем колбэк в фазу "poll"
+fs.readFile(__filename, () => {                                        // Регистрируем колбэк в фазу "poll"
     setTimeout(() => console.log("readFile setTimeout"), 0)
     setImmediate(() => console.log("readFile setImmediate"))
     process.nextTick(() => console.log("readFile next tick"))
 })
 
-Promise.resolve().then(() => {                                                  // Регистрируем колбэк в очередь "microtasks"
+Promise.resolve().then(() => {                                                    // Регистрируем колбэк в очередь "microtasks"
     console.log('Promise')
     process.nextTick(() => console.log('Promise next tick'))
 })
 
-process.nextTick(() => console.log("next tick"))                                // Регистрируем колбэк в очередь "nextTickQueue"
+process.nextTick(() => console.log("next tick"))                       // Регистрируем колбэк в очередь "nextTickQueue"
 
-setTimeout(() => console.log("setTimeout 2"))                         // Регистрируем колбэк в фазу "timers"
+setTimeout(() => console.log("setTimeout 2"))                           // Регистрируем колбэк в фазу "timers"
 
-console.log('end')                                                              // Синхронная операция
+console.log('end')                                                                // Синхронная операция
 
 /*
     0. После того Node js запарсил наш код (перед тем как EventLoop начал работу) имеем следующий расклад:
@@ -219,5 +219,4 @@ console.log('end')                                                              
        Они есть выполняет их
     2. Т. к. колбэки I/O операций выполняются в фазе "poll", setImmediate в этих колбеках всегда будет
        выполняться раньше, чем setTimeout и setImmediate
-
  */
