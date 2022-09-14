@@ -1,8 +1,8 @@
 const fs = require('fs')
 
-console.log('start')                                                              // Синхронная операци
+console.log('start')                                                   // Синхронная операци
 
-setTimeout(() => {                                                      // Регистрируем колбэк в фазу "timers"
+setTimeout(() => {                                                     // Регистрируем колбэк в фазу "timers"
     console.log('setTimeout 1')
 }, 0)
 
@@ -14,16 +14,16 @@ fs.readFile(__filename, () => {                                        // Рег
     process.nextTick(() => console.log("readFile next tick"))
 })
 
-Promise.resolve().then(() => {                                                    // Регистрируем колбэк в очередь "microtasks"
+Promise.resolve().then(() => {                                         // Регистрируем колбэк в очередь "microtasks"
     console.log('Promise')
     process.nextTick(() => console.log('Promise next tick'))
 })
 
 process.nextTick(() => console.log("next tick"))                       // Регистрируем колбэк в очередь "nextTickQueue"
 
-setTimeout(() => console.log("setTimeout 2"))                           // Регистрируем колбэк в фазу "timers"
+setTimeout(() => console.log("setTimeout 2"))                          // Регистрируем колбэк в фазу "timers"
 
-console.log('end')                                                                // Синхронная операция
+console.log('end')                                                     // Синхронная операция
 
 /*
     0. После того Node js запарсил наш код (перед тем как EventLoop начал работу) имеем следующий расклад:
