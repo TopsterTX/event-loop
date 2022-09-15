@@ -14,7 +14,7 @@ fs.readFile(__filename, () => {                                        // Рег
     process.nextTick(() => console.log("readFile next tick"))
 })
 
-Promise.resolve().then(() => {                                         // Регистрируем колбэк в очередь "microtasks"
+Promise.resolve().then(() => {                                         // Регистрируем колбэк в очередь "otherMicrotasksQueue"
     console.log('Promise')
     process.nextTick(() => console.log('Promise next tick'))
 })
@@ -38,7 +38,7 @@ console.log('end')                                                     // Син
 
     QUEUES:
     1. nextTickQueue:                   ["next tick"],
-    2. microtasks:                      [Promise.resolve],
+    2. otherMicrotasksQueue:            [Promise.resolve],
  */
 
 
@@ -55,11 +55,11 @@ console.log('end')                                                     // Син
 
     QUEUES:
     1. nextTickQueue:                   [],
-    2. microtasks:                      [Promise.resolve],
+    2. otherMicrotasksQueue:            [Promise.resolve],
  */
 
 /*
-    2. После того как очередь "nextTickQueue" опустела, EventLoop приступает к очереди "microtasks"
+    2. После того как очередь "nextTickQueue" опустела, EventLoop приступает к очереди "otherMicrotasksQueue"
 
     PHASES:
     1. timers:                          ["setTimeout 1", "setTimeout 2"],
@@ -71,11 +71,11 @@ console.log('end')                                                     // Син
 
     QUEUES:
     1. nextTickQueue:                   ["Promise next tick"],
-    2. microtasks:                      [],
+    2. otherMicrotasksQueue:            [],
  */
 
 /*
-    3. Задача из очереди "microtasks" добавила нам колбек в очередь "nextTickQueue", EventLoop вызывает его
+    3. Задача из очереди "otherMicrotasksQueue" добавила нам колбек в очередь "nextTickQueue", EventLoop вызывает его
 
     PHASES:
     1. timers:                          ["setTimeout 1", "setTimeout 2"],
@@ -87,11 +87,11 @@ console.log('end')                                                     // Син
 
     QUEUES:
     1. nextTickQueue:                   [],
-    2. microtasks:                      [],
+    2. otherMicrotasksQueue:            [],
  */
 
 /*
-    4. После того как очереди с приоритетными задачами ("nextTickQueue", "microtasks") закончились
+    4. После того как очереди с приоритетными задачами ("nextTickQueue", "otherMicrotasksQueue") закончились
        EventLoop приступает к выполнению фаз. Первая на очереди фаза "timers" EventLoop вызывает все колбеки в ней
        После того как выполнил колбэки в фазе "timers", смотрит очереди на наличие задач (их нет)
 
@@ -105,14 +105,15 @@ console.log('end')                                                     // Син
 
     QUEUES:
     1. nextTickQueue:                   [],
-    2. microtasks:                      [],
+    2. otherMicrotasksQueue:            [],
  */
 
 /*
     5. Попадает в фазу "pendingCallbacks" не обнаруживает в ней колбэков, выходит, проверяет очереди на наличие задач,
        попадает в фазу "idle, prepare" там тоже ничего нету, выходит, и опять проверяет очереди,
-       попадает в фазу "poll" ПРОВЕРЯЕТ НАЛИЧИЕ setImmediate ПЕРЕД ВЫПОЛНЕНИЕМ callback'ов в фазe "poll",
-       следовательно выходит с фазы "poll", проверяет очереди, попадает в фазу "check", выполняет все коллбеки
+       попадает в фазу "poll" и перед выполнением колбеков в этой фазе ПРОВЕРЯЕТ НАЛИЧИЕ setImmediate В ФАЗЕ "check",
+       и если они есть, то выполняет их ИГНОРИРУЯ ФАЗУ "poll" (выходит из "poll" -> проверяет очереди -> заходит
+       в "check" -> выполняет колбэки)
 
     PHASES:
     1. timers:                          [],
@@ -124,7 +125,7 @@ console.log('end')                                                     // Син
 
     QUEUES:
     1. nextTickQueue:                   [],
-    2. microtasks:                      [],
+    2. otherMicrotasksQueue:            [],
  */
 
 /*
@@ -142,7 +143,7 @@ console.log('end')                                                     // Син
 
     QUEUES:
     1. nextTickQueue:                   ["readFile next tick"],
-    2. microtasks:                      [],
+    2. otherMicrotasksQueue:            [],
  */
 
 /*
@@ -158,7 +159,7 @@ console.log('end')                                                     // Син
 
     QUEUES:
     1. nextTickQueue:                   [],
-    2. microtasks:                      [],
+    2. otherMicrotasksQueue:            [],
  */
 
 /*
@@ -174,7 +175,7 @@ console.log('end')                                                     // Син
 
     QUEUES:
     1. nextTickQueue:                   [],
-    2. microtasks:                      [],
+    2. otherMicrotasksQueue:            [],
  */
 
 /*
@@ -191,7 +192,7 @@ console.log('end')                                                     // Син
 
     QUEUES:
     1. nextTickQueue:                   [],
-    2. microtasks:                      [],
+    2. otherMicrotasksQueue:            [],
  */
 
 /*
@@ -215,8 +216,8 @@ console.log('end')                                                     // Син
 
 /*
     NOTES
-    1. Перед выполнением фазы "poll", EventLoop всегда проверяет наличие колбэков в фазе "check" и если
-       Они есть выполняет их
+    1. Когда EventLoop попадает в фазу "poll", он проверяет наличие колбэков в фазе "check" и если
+       Они есть выполняет их, игнорируя фазу "poll"
     2. Т. к. колбэки I/O операций выполняются в фазе "poll", setImmediate в этих колбеках всегда будет
        выполняться раньше, чем setTimeout и setImmediate
  */
