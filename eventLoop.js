@@ -220,4 +220,8 @@ console.log('end')                                                     // Син
        Они есть выполняет их, игнорируя фазу "poll"
     2. Т. к. колбэки I/O операций выполняются в фазе "poll", setImmediate в этих колбеках всегда будет
        выполняться раньше, чем setTimeout и setImmediate
+    
+    Ссылка на первоисточники: 
+        https://www.youtube.com/watch?v=7f787SsgknA&ab_channel=EPAMMoscowITsubbotnik
+        https://habr.com/ru/post/681882/
  */
