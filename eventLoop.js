@@ -1,6 +1,6 @@
 const fs = require('fs')
 
-console.log('start')                                                   // Синхронная операци
+console.log('start')                                                   // Синхронная операция
 
 setTimeout(() => {                                                     // Регистрируем колбэк в фазу "timers"
     console.log('setTimeout 1')
